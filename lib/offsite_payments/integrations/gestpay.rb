@@ -4,7 +4,8 @@ module OffsitePayments #:nodoc:
   module Integrations #:nodoc:
     module Gestpay
       mattr_accessor :service_url
-      self.service_url = 'https://ecomm.sella.it/gestpay/pagam.asp'
+      #self.service_url = 'https://ecomm.sella.it/gestpay/pagam.asp'
+      self.service_url = 'https://testecomm.sella.it'
 
       def self.notification(post, options = {})
         Notification.new(post)
@@ -19,7 +20,9 @@ module OffsitePayments #:nodoc:
 
         VERSION = "2.0"
         ENCRYPTION_PATH = "/CryptHTTPS/Encrypt.asp"
+        #ENCRYPTION_PATH = "/Encrypt"
         DECRYPTION_PATH = "/CryptHTTPS/Decrypt.asp"
+        #DECRYPTION_PATH = "/Decrypt"
         DELIMITER = '*P1*'
 
         CURRENCY_MAPPING = {
@@ -50,8 +53,6 @@ module OffsitePayments #:nodoc:
           site.use_ssl = true
           site.verify_mode    = OpenSSL::SSL::VERIFY_NONE
           site.get(path).body
-        rescue Timeout::Error, Errno::ECONNRESET, Errno::ETIMEDOUT
-          raise ActionViewHelperError, "Error occured while contacting payment gateway. Please try again."
         end
       end
 
@@ -66,6 +67,7 @@ module OffsitePayments #:nodoc:
         def initialize(order, account, options = {})
           super
           add_field('PAY1_IDLANGUAGE', 2)
+          puts "\n\n\n\n ciao"
         end
 
         mapping :account, 'ShopLogin'
@@ -105,6 +107,7 @@ module OffsitePayments #:nodoc:
         end
 
         def get_encrypted_string
+          puts "\n\n\n\n Trying..." + Gestpay.service_url + " Query = " + encryption_query_string.to_s
           response = ssl_get(Gestpay.service_url, encryption_query_string)
           parse_response(response)
         rescue GestpayEncryptionResponseError => e
